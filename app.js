@@ -83,6 +83,7 @@ app.post('/',(req,res) => {
     .then((data,err) => {
         if(!err){
             res.send('Success')
+            q += 1
         }
         else {
             res.send('Error adding a quote')
