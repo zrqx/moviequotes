@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const cors = require('cors')
 const express = require('express')
 const app = express()
 const mongoose = require("mongoose")
@@ -69,7 +70,7 @@ const handleCache = async () => {
 
 handleCache()
 
-app.get('/',(req,res) => {
+app.get('/',cors(),(req,res) => {
     if (data) {
         let {_id,__v,...main} = data[getRandomInt(data.length)]
         res.send(main)
@@ -78,7 +79,7 @@ app.get('/',(req,res) => {
     }
 })
 
-app.post('/',(req,res) => {
+app.post('/',cors(),(req,res) => {
     Quote.create(req.body)
     .then((data,err) => {
         if(!err){
