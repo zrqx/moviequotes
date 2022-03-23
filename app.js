@@ -13,9 +13,10 @@ const interval = process.env.INTERVAL || 60
 const cacheFilePath = path.join(__dirname, 'quote.cache')
 
 let data = ''
-let queue = 0
 
-app.use(morgan(':remote-addr  - :method  :response-time ms'))
+if (process.env.ENVIRONMENT != "RPROXY") {
+    app.use(morgan(':remote-addr  - :method  :response-time ms'))
+}
 app.use(express.urlencoded({extended:true}))
 
 mongoose.connect(process.env.DB_URI,{useNewUrlParser:true,useUnifiedTopology:true},(err,stat) => {
@@ -44,7 +45,7 @@ const setCache = async (path) => {
 
 const handleCache = async () => {
     setTimeout(handleCache,interval*60*1000)
-    if (!data || queue != 0) {
+    if (!data) {
         if (fs.existsSync(cacheFilePath)){
             fs.readFile(cacheFilePath, {encoding: 'utf-8'}, function(err,raw){
                 if (!err) {
