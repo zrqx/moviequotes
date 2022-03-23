@@ -6,6 +6,7 @@ const app = express()
 const mongoose = require("mongoose")
 const morgan = require("morgan")
 const Quote = require('./models/quote')
+const { response } = require('express')
 require('dotenv').config()
 
 const port = process.env.PORT || 3000
@@ -34,31 +35,37 @@ function getDateString(){
 }
 
 const setCache = async (path) => {
-    data = await Quote.find({})
-    fs.writeFile(path, JSON.stringify(data), function(err) {
+    let response = await Quote.find({})
+    fs.writeFile(path, JSON.stringify(response), function(err) {
         if(err) {
             return console.log(err);
         }
         console.log(`${getDateString()} --> Set Cache - Successful`)
+        loadCache(cacheFilePath)
+        console.log(`${getDateString()} --> Load Cache - Successful`)
     });
+}
+
+const loadCache = async (cacheFilePath) => {
+    if (fs.existsSync(cacheFilePath)){
+        fs.readFile(cacheFilePath, {encoding: 'utf-8'}, function(err,raw){
+            if (!err) {
+                console.log(`${getDateString()} --> Cache HIT - local file`)
+                data = JSON.parse(raw)
+            } else {
+                console.log(`${getDateString()} --> Error reading from local cache`);
+            }
+        })
+    } else {
+        console.log(`${getDateString()} --> Cache Miss - DB Query`)
+        setCache(cacheFilePath)
+    }
 }
 
 const handleCache = async () => {
     setTimeout(handleCache,interval*60*1000)
     if (!data) {
-        if (fs.existsSync(cacheFilePath)){
-            fs.readFile(cacheFilePath, {encoding: 'utf-8'}, function(err,raw){
-                if (!err) {
-                    console.log(`${getDateString()} --> Cache HIT - local file`)
-                    data = JSON.parse(raw)
-                } else {
-                    console.log(`${getDateString()} --> Error reading from local cache`);
-                }
-            })
-        } else {
-            console.log(`${getDateString()} --> Cache Miss - DB Query`)
-            setCache(cacheFilePath)
-        }
+        loadCache(cacheFilePath)
     } else {
         console.log(`${getDateString()} --> Cached data exists`)
     }
