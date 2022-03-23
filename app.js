@@ -19,8 +19,9 @@ if (process.env.ENVIRONMENT != "RPROXY") {
     app.use(morgan(':remote-addr  - :method  :response-time ms'))
 }
 app.use(express.urlencoded({extended:true}))
-app.use(express.static('public'))
+app.use(express.static(path.join(__dirname, 'public')))
 app.set('view engine','ejs')
+app.set('views', path.join(__dirname, 'views'))
 
 mongoose.connect(process.env.DB_URI,{useNewUrlParser:true,useUnifiedTopology:true},(err,stat) => {
     if (!err) console.log('DB Connection Established')
