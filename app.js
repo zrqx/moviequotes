@@ -19,6 +19,8 @@ if (process.env.ENVIRONMENT != "RPROXY") {
     app.use(morgan(':remote-addr  - :method  :response-time ms'))
 }
 app.use(express.urlencoded({extended:true}))
+app.use(express.static('public'))
+app.set('view engine','ejs')
 
 mongoose.connect(process.env.DB_URI,{useNewUrlParser:true,useUnifiedTopology:true},(err,stat) => {
     if (!err) console.log('DB Connection Established')
@@ -73,7 +75,11 @@ const handleCache = async () => {
 
 handleCache()
 
-app.get('/',cors(),(req,res) => {
+app.get('/',(req,res) => {
+    res.render('home')
+})
+
+app.get('/api',cors(),(req,res) => {
     if (data) {
         let {_id,__v,...main} = data[getRandomInt(data.length)]
         res.send(main)
@@ -82,7 +88,7 @@ app.get('/',cors(),(req,res) => {
     }
 })
 
-app.post('/',cors(),(req,res) => {
+app.post('/api',cors(),(req,res) => {
     Quote.create(req.body)
     .then((data,err) => {
         if(!err){
