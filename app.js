@@ -58,11 +58,6 @@ const handleCache = async () => {
             console.log(`${getDateString()} --> Cache Miss - DB Query`)
             setCache(cacheFilePath)
         }
-        if (queue != 0){
-            console.log(`${getDateString()} --> Adding ${queue} new item/s to Cache`)
-            setCache(cacheFilePath)
-            queue = 0
-        }
     } else {
         console.log(`${getDateString()} --> Cached data exists`)
     }
@@ -84,7 +79,11 @@ app.post('/',cors(),(req,res) => {
     .then((data,err) => {
         if(!err){
             res.send('Success')
-            q += 1
+            setCache(cacheFilePath)
+              .then(() => {
+                console.log(`${getDateString()} --> Added a new item to Cache`)
+              })
+              .catch(e => console.log('Error setting Cache'))
         }
         else {
             res.send('Error adding a quote')
